@@ -50,14 +50,17 @@ const JobList: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const { REACT_APP_API_KEY, REACT_APP_BASE_URL, REACT_APP_BOARD_KEYS } = process.env
+        const sortOrder = 'desc'
         const options = {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            'X-API-KEY': 'askr_dbfb6f33e7d3c6b6e334b2d420f81465',
+            'X-API-KEY': REACT_APP_API_KEY,
           },
-        };
-        const response = await fetch('https://api.hrflow.ai/v1/jobs/searching?page=1&limit=30&order_by=desc&board_keys=["887595b735d68f0bc0b0b0535f7d8f7d158a3f4e"]', options)
+        }
+        const URL = `${REACT_APP_BASE_URL}/jobs/searching?page=1&limit=30&order_by=${sortOrder}&board_keys=${REACT_APP_BOARD_KEYS}`
+        const response = await fetch(URL, options)
         const data = await response.json()
         if (response.ok) {
           setJobs(data.data.jobs)
