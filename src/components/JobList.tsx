@@ -1,4 +1,3 @@
-'use client'
 import { useEffect, useState } from 'react'
 
 interface Job {
@@ -73,7 +72,7 @@ const JobList: React.FC = () => {
   }, [])
   return (
     <div>
-      <h1>Liste des emplois</h1>
+      <h1>Job list</h1>
       <ul>
         {jobs.map((job) => (
           <li key={job.id}>
