@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import SearchBar from './SearchBar'
 
 interface Job {
   id: number
@@ -74,12 +75,20 @@ interface Meta {
 }
 
 const JobList: React.FC = () => {
+  const [searchValue, setSearchValue] = useState<string>('')
   const [jobs, setJobs] = useState<Job[]>([])
   const [meta, setMeta] = useState<Meta | null>(null)
   const getTagValue = (job: Job, tagName: string) => {
     const tag = job.tags?.find((tag) => tag.name.toLowerCase() === tagName)
     return tag?.value ?? ''
   }
+  const handleSearchValue = (newValue: string) => {
+    setSearchValue(newValue)
+  }
+  const filteredJobs = useMemo(() => {
+    const lowerSearchValue = searchValue.toLowerCase()
+    return searchValue !== '' ? jobs.filter(job => job.name.toLowerCase().includes(lowerSearchValue)) : jobs
+  }, [searchValue, jobs])
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -110,8 +119,9 @@ const JobList: React.FC = () => {
   return (
     <div className="job-list">
       <h1>Job list</h1>
+      <SearchBar initValue={searchValue} onChange={handleSearchValue} />
       <ul>
-        {jobs.map((job) => (
+        {filteredJobs.map((job) => (
           <li key={job.id}>
             <h2>{job.name}</h2>
             <h3>{getTagValue(job, 'company')}</h3>
