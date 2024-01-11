@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import SearchBar from './SearchBar'
+import { Card, CardContent, Typography } from '@mui/material'
 
 interface Job {
   id: number
@@ -118,26 +119,39 @@ const JobList: React.FC = () => {
   }, [])
   return (
     <div className="job-list">
-      <h1>Job list</h1>
-      <SearchBar initValue={searchValue} onChange={handleSearchValue} />
-      <ul>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <h1>Job list</h1>
+        <SearchBar initValue={searchValue} onChange={handleSearchValue} />
         {filteredJobs.map((job) => (
-          <li key={job.id}>
-            <h2>{job.name}</h2>
-            <h3>{getTagValue(job, 'company')}</h3>
-            <i>{getTagValue(job, 'category')}</i>
-            <h4>{job.location?.text} - {getTagValue(job, 'type')}</h4>
-            <h5>{job.skills.map(tag => tag.name).join(', ')}</h5>
-            <p>{job.summary || 'No job description available :('}</p>
-            <br />
-          </li>
+          <Card key={job.id} className="min-h-full">
+            <CardContent>
+              <Typography variant="h4" component="div" className="mb-2">
+                {job.name}
+              </Typography>
+              <Typography variant="h5" component="div" className="mb-2">
+                {getTagValue(job, 'company')}
+              </Typography>
+              <Typography variant="h6" component="div" className="mb-2">
+                {getTagValue(job, 'category')}
+              </Typography>
+              <Typography variant="subtitle1" color="textSecondary" className="mb-2">
+                {job.location?.text} - {getTagValue(job, 'type')}
+              </Typography>
+              <Typography variant="h6" component="div" className="mb-2">
+                {job.skills.map(tag => tag.name).join(', ')}
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                {job.summary || 'No job description available :('}
+              </Typography>
+            </CardContent>
+          </Card>
         ))}
-      </ul>
-      {meta &&
-        <footer>
-          <div>{meta.count} results</div>
-          <div>Page {meta.page}</div>
-        </footer>}
+        {meta &&
+          <footer>
+            <div>{filteredJobs.length} out of {meta.count} results</div>
+            <div>Page {meta.page}</div>
+          </footer>}
+      </div>
     </div>
   )
 }
