@@ -1,95 +1,48 @@
 import { useEffect, useMemo, useState } from 'react'
 import SearchBar from './SearchBar'
-import { Card, CardContent, Typography } from '@mui/material'
-
-interface Job {
-  id: number
-  key: string
-  reference: string | null
-  board: {
-    key: string
-    name: string
-    type: string
-    subtype: string
-    environment: string
-  }
-  board_key: string
-  name: string
-  url: string | null
-  picture: null
-  summary: string
-  location: {
-    text: string
-    lat: number
-    lng: number
-    gmaps: null
-    fields: []
-  }
-  archive: null
-  archived_at: null
-  updated_at: string
-  created_at: string
-  sections: []
-  culture: null
-  responsibilities: null
-  requirements: null
-  benefits: null
-  interviews: null
-  skills: {
-    name: string
-    value: null
-    type: null
-  }[]
-  languages: {
-    name: string
-    value: null
-  }[]
-  certifications: {
-    name: string
-    value: null
-    type: null
-  }[]
-  courses: []
-  tasks: {
-    name: string
-    value: null
-    type: null
-  }[]
-  interests: []
-  tags: {
-    name: string
-    value: string
-  }[]
-  metadatas: []
-  ranges_float: []
-  ranges_date: {
-    name: string
-    value_min: string
-    value_max: string
-  }[]
-}
-interface Meta {
-  count: number
-  maxPage: number
-  page: number
-  total: number
-}
+import MultipleSelectChip from './MultipleSelectChip'
+import { Card, CardContent, Typography, SelectChangeEvent } from '@mui/material'
+import Job from '../interfaces/Job'
+import Meta from '../interfaces/Meta'
+import snakify from '../utils/utils'
+import SelectOption from '../interfaces/SelectOption'
 
 const JobList: React.FC = () => {
-  const [searchValue, setSearchValue] = useState<string>('')
+  const [searchValue, setSearchValue] = useState('')
   const [jobs, setJobs] = useState<Job[]>([])
   const [meta, setMeta] = useState<Meta | null>(null)
-  const getTagValue = (job: Job, tagName: string) => {
+  const getTagValue = (job: Job, tagName: string): string => {
     const tag = job.tags?.find((tag) => tag.name.toLowerCase() === tagName)
     return tag?.value ?? ''
   }
   const handleSearchValue = (newValue: string) => {
     setSearchValue(newValue)
   }
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+  const JOB_CATEGORIES_API = [
+    'AI / Research & Development',
+    'Artificial Intelligence',
+    'Financial Services',
+    'Human Resources',
+    'Software Engineering',
+  ]
+  const jobCategoryOptions = JOB_CATEGORIES_API.map((cat) => ({
+    label: cat,
+    value: snakify(cat),
+  })) as SelectOption[]
+  const handleSelectedCategoriesChange = (e: SelectChangeEvent) => {
+    console.log(e.target.value)
+    setSelectedCategories(e?.target?.value as unknown as string[])
+  }
   const filteredJobs = useMemo(() => {
-    const lowerSearchValue = searchValue.toLowerCase()
-    return searchValue !== '' ? jobs.filter(job => job.name.toLowerCase().includes(lowerSearchValue)) : jobs
-  }, [searchValue, jobs])
+    const lowerCaseSearchValue = searchValue.toLowerCase()
+    const jobsInSelectedCategories = selectedCategories.length > 0 ?
+      jobs.filter((job) => selectedCategories.includes(snakify(getTagValue(job, 'category')))) :
+      jobs
+    return searchValue !== '' ?
+      jobsInSelectedCategories.filter(job => job.name.toLowerCase().includes(lowerCaseSearchValue)) :
+      jobsInSelectedCategories
+  }, [searchValue, jobs, selectedCategories])
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -122,6 +75,12 @@ const JobList: React.FC = () => {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         <h1>Job list</h1>
         <SearchBar initValue={searchValue} onChange={handleSearchValue} />
+        <MultipleSelectChip
+          value={selectedCategories}
+          options={jobCategoryOptions}
+          onChange={handleSelectedCategoriesChange}
+          label="Categories"
+        />
         {filteredJobs.map((job) => (
           <Card key={job.id} className="min-h-full">
             <CardContent>
